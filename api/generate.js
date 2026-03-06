@@ -1,17 +1,13 @@
-// api/generate.js
-// هذا الملف يعمل على سيرفر Vercel ولا يراه المستخدم النهائي
 export default async function handler(req, res) {
-    // التأكد من أن الطلب من نوع POST فقط لحماية السيرفر
     if (req.method !== 'POST') {
         return res.status(405).json({ error: 'Method Not Allowed' });
     }
 
-    const { prompt, mode } = req.body;
-    const apiKey = process.env.GROK_API_KEY; // جلب المفتاح بأمان من الإعدادات
+    const { prompt } = req.body;
+    const apiKey = process.env.GROK_API_KEY;
 
     try {
-        // الاتصال بـ API الخاص بـ Grok
-        // ملاحظة: الرابط أدناه هو مثال، سنحدثه حسب توثيق Grok الرسمي لديك
+        // الرابط الصحيح حسب التوثيق للمحادثة وتوليد الصور
         const response = await fetch('https://api.x.ai/v1/chat/completions', {
             method: 'POST',
             headers: {
@@ -19,21 +15,25 @@ export default async function handler(req, res) {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-                model: "grok-beta", // أو الموديل المخصص للصور
+                model: "grok-2-vision-1212", // هذا الموديل يدعم الرؤية والصور
                 messages: [
-                    { role: "system", content: "You are a creative AI assistant." },
                     { role: "user", content: prompt }
-                ]
+                ],
+                stream: false,
+                temperature: 0.7
             }),
         });
 
         const data = await response.json();
-        
-        // إعادة النتيجة للواجهة الأمامية
+
+        // فحص إذا كان هناك خطأ من Grok نفسه (مثل نقص الرصيد)
+        if (data.error) {
+            return res.status(400).json({ error: data.error.message });
+        }
+
         res.status(200).json(data);
 
     } catch (error) {
-        console.error('Error:', error);
-        res.status(500).json({ error: 'فشل السيرفر في معالجة الطلب' });
+        res.status(500).json({ error: 'تعذر الاتصال بخوادم xAI' });
     }
 }
