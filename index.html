@@ -3,30 +3,37 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Grok AI Hub - Secure</title>
+    <title>Grok AI Hub</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-msg { animation: fadeIn 0.3s ease-out forwards; }
+    </style>
 </head>
 <body class="bg-slate-900 text-white font-sans h-screen flex overflow-hidden">
 
-    <aside class="w-64 border-l border-slate-700 p-6 flex flex-col gap-4 bg-slate-800 shadow-xl">
-        <h1 class="text-2xl font-bold text-blue-400 mb-6 tracking-tight">Grok Vision</h1>
-        <button onclick="setMode('image')" id="btn-image" class="mode-btn bg-blue-600 p-3 rounded-lg text-right transition-all">🖼️ توليد صورة</button>
-        <button onclick="setMode('edit')" id="btn-edit" class="mode-btn bg-slate-700 p-3 rounded-lg text-right hover:bg-slate-600 transition-all">🎨 تعديل صورة</button>
-        <button onclick="setMode('video')" id="btn-video" class="mode-btn bg-slate-700 p-3 rounded-lg text-right hover:bg-slate-600 transition-all">🎬 تحويل لفيديو</button>
+    <aside class="w-64 border-l border-slate-700 p-6 flex flex-col gap-4 bg-slate-800 shadow-2xl">
+        <h1 class="text-2xl font-bold text-blue-400 mb-6">Grok Vision</h1>
+        <nav class="flex flex-col gap-2">
+            <button onclick="setMode('chat')" id="btn-chat" class="mode-btn bg-blue-600 p-3 rounded-xl text-right transition-all">💬 دردشة ذكية</button>
+            <button onclick="setMode('image')" id="btn-image" class="mode-btn bg-slate-700 p-3 rounded-xl text-right hover:bg-slate-600 transition-all">🖼️ توليد صورة</button>
+            <button onclick="setMode('edit')" id="btn-edit" class="mode-btn bg-slate-700 p-3 rounded-xl text-right hover:bg-slate-600 transition-all">🎨 تعديل صورة</button>
+            <button onclick="setMode('video')" id="btn-video" class="mode-btn bg-slate-700 p-3 rounded-xl text-right hover:bg-slate-600 transition-all">🎬 تحويل لفيديو</button>
+        </nav>
     </aside>
 
-    <main class="flex-1 flex flex-col relative">
-        <div id="chat-box" class="flex-1 p-6 overflow-y-auto space-y-4 pb-24">
-            <div class="bg-slate-800 p-4 rounded-2xl max-w-lg shadow-lg border border-slate-700">
-                أهلاً بك في النسخة الآمنة! أنا جاهز لتنفيذ طلباتك عبر Grok API. ماذا سنصنع الآن؟
+    <main class="flex-1 flex flex-col relative bg-[radial-gradient(circle_at_top,_var(--tw-gradient-stops))] from-slate-800 to-slate-900">
+        <div id="chat-box" class="flex-1 p-6 overflow-y-auto space-y-4 pb-32">
+            <div class="bg-slate-700/50 p-4 rounded-2xl max-w-lg border border-slate-600 animate-msg">
+                مرحباً بك! أنا مساعدك المرتبط بـ Grok. وضع التشغيل الحالي: <span id="mode-text" class="font-bold text-blue-400">دردشة ذكية</span>.
             </div>
         </div>
 
-        <div class="p-6 bg-slate-900/80 backdrop-blur-md border-t border-slate-800 absolute bottom-0 w-full">
-            <div class="flex gap-4 items-center max-w-4xl mx-auto">
-                <input type="text" id="user-input" placeholder="اكتب وصفك هنا..." 
-                       class="flex-1 p-4 rounded-xl bg-slate-800 border border-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all">
-                <button onclick="sendMessage()" id="send-btn" class="bg-blue-600 hover:bg-blue-500 px-8 py-4 rounded-xl font-bold shadow-lg transition-all active:scale-95">
+        <div class="absolute bottom-0 w-full p-6 bg-slate-900/90 backdrop-blur-md border-t border-slate-800">
+            <div class="flex gap-4 max-w-5xl mx-auto">
+                <input type="text" id="user-input" placeholder="اكتب سؤالك أو وصف الصورة هنا..." 
+                       class="flex-1 p-4 rounded-2xl bg-slate-800 border border-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all text-white">
+                <button onclick="sendMessage()" id="send-btn" class="bg-blue-600 hover:bg-blue-500 px-8 py-4 rounded-2xl font-bold shadow-lg transition-all active:scale-95">
                     إرسال
                 </button>
             </div>
@@ -34,27 +41,24 @@
     </main>
 
     <script>
-        let currentMode = 'image';
+        let currentMode = 'chat';
 
         function setMode(mode) {
             currentMode = mode;
+            const modes = { 'chat': 'دردشة ذكية', 'image': 'توليد صورة', 'edit': 'تعديل صورة', 'video': 'تحويل لفيديو' };
+            document.getElementById('mode-text').innerText = modes[mode];
             document.querySelectorAll('.mode-btn').forEach(btn => btn.classList.replace('bg-blue-600', 'bg-slate-700'));
             document.getElementById('btn-' + mode).classList.replace('bg-slate-700', 'bg-blue-600');
         }
 
         async function sendMessage() {
             const input = document.getElementById('user-input');
-            const chatBox = document.getElementById('chat-box');
             const prompt = input.value.trim();
-
             if (!prompt) return;
 
-            // إضافة رسالة المستخدم للشاشة
             appendMessage('user', prompt);
             input.value = '';
-
-            // إضافة مؤشر تحميل
-            const loadingId = appendMessage('bot', 'جاري المعالجة عبر Grok...');
+            const loadingId = appendMessage('bot', 'جاري التفكير...');
 
             try {
                 const response = await fetch('/api/generate', {
@@ -64,21 +68,17 @@
                 });
 
                 const data = await response.json();
-                
-                // تحديث رسالة البوت بالنتيجة
-                document.getElementById(loadingId).innerText = data.choices[0].message.content;
-
+                document.getElementById(loadingId).innerHTML = data.result || data.error || "خطأ غير متوقع";
             } catch (error) {
-                document.getElementById(loadingId).innerText = "عذراً، حدث خطأ في الاتصال بالسيرفر.";
+                document.getElementById(loadingId).innerText = "فشل الاتصال بالسيرفر.";
             }
         }
 
         function appendMessage(role, text) {
             const chatBox = document.getElementById('chat-box');
             const id = 'msg-' + Date.now();
-            const align = role === 'user' ? 'mr-auto bg-blue-700' : 'ml-auto bg-slate-800';
-            const html = `<div id="${id}" class="${align} p-4 rounded-2xl max-w-lg shadow-md border border-slate-700 animate-fade-in">${text}</div>`;
-            chatBox.innerHTML += html;
+            const align = role === 'user' ? 'mr-auto bg-blue-600' : 'ml-auto bg-slate-700 border border-slate-600';
+            chatBox.innerHTML += `<div id="${id}" class="${align} p-4 rounded-2xl max-w-lg shadow-lg animate-msg text-sm line-height-relaxed">${text}</div>`;
             chatBox.scrollTop = chatBox.scrollHeight;
             return id;
         }
