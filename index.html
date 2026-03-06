@@ -3,31 +3,32 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Grok AI Hub - Economy Mode</title>
+    <title>Grok AI - خالد</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { background-color: #0f172a; color: white; font-family: sans-serif; }
+        .chat-container { height: calc(100vh - 120px); overflow-y: auto; padding: 20px; }
+        .input-area { position: fixed; bottom: 0; width: 100%; padding: 20px; background: #1e293b; border-t: 1px solid #334155; }
+    </style>
 </head>
-<body class="bg-slate-900 text-white font-sans h-screen flex">
+<body class="flex">
 
-    <aside class="w-64 border-l border-slate-700 p-6 flex flex-col gap-3 bg-slate-800">
-        <h1 class="text-xl font-bold text-blue-400 mb-6 text-center">Grok Smart Hub</h1>
-        <button onclick="setMode('chat')" id="btn-chat" class="mode-btn bg-blue-600 p-3 rounded-lg text-right text-sm transition-all">💬 دردشة (الأوفر)</button>
-        <button onclick="setMode('image')" id="btn-image" class="mode-btn bg-slate-700 p-3 rounded-lg text-right text-sm transition-all">🖼️ توليد صورة ($0.02)</button>
-        <button onclick="setMode('edit')" id="btn-edit" class="mode-btn bg-slate-700 p-3 rounded-lg text-right text-sm transition-all">🎨 تعديل صورة</button>
-        <button onclick="setMode('video')" id="btn-video" class="mode-btn bg-slate-700 p-3 rounded-lg text-right text-sm transition-all">🎬 فيديو ($0.05/ث)</button>
+    <aside class="w-64 bg-slate-800 h-screen p-5 flex flex-col gap-4 border-l border-slate-700">
+        <h1 class="text-xl font-bold text-blue-400 text-center mb-5">Grok AI Hub</h1>
+        <button onclick="setMode('chat')" id="btn-chat" class="mode-btn bg-blue-600 p-3 rounded-lg text-right">💬 دردشة ذكية</button>
+        <button onclick="setMode('image')" id="btn-image" class="mode-btn bg-slate-700 p-3 rounded-lg text-right">🖼️ توليد صورة</button>
+        <button onclick="setMode('edit')" id="btn-edit" class="mode-btn bg-slate-700 p-3 rounded-lg text-right">🎨 تعديل صورة</button>
+        <button onclick="setMode('video')" id="btn-video" class="mode-btn bg-slate-700 p-3 rounded-lg text-right">🎬 فيديو</button>
     </aside>
 
-    <main class="flex-1 flex flex-col relative bg-slate-900">
-        <div id="chat-box" class="flex-1 p-6 overflow-y-auto space-y-4 pb-32">
-            <div class="bg-slate-800 p-4 rounded-2xl max-w-lg border border-slate-700">
-                مرحباً! تم ضبط النظام على **وضع التوفير**. أنا جاهز للعمل.
-            </div>
+    <main class="flex-1 relative">
+        <div id="chat-box" class="chat-container space-y-4">
+            <div class="bg-slate-700 p-4 rounded-xl max-w-md">أهلاً خالد! أنا جاهز. اختر خدمة وابدأ الكتابة.</div>
         </div>
 
-        <div class="absolute bottom-0 w-full p-4 bg-slate-900/90 border-t border-slate-800">
-            <div class="flex gap-2 max-w-4xl mx-auto">
-                <input type="text" id="user-input" placeholder="اكتب هنا..." class="flex-1 p-3 rounded-xl bg-slate-800 border border-slate-700 focus:outline-none focus:ring-1 focus:ring-blue-500">
-                <button onclick="sendMessage()" class="bg-blue-600 px-6 py-3 rounded-xl font-bold hover:bg-blue-500">إرسال</button>
-            </div>
+        <div class="input-area flex gap-3">
+            <input type="text" id="user-input" placeholder="اكتب هنا..." class="flex-1 p-3 rounded-lg bg-slate-900 border border-slate-700 text-white outline-none focus:border-blue-500">
+            <button onclick="sendMessage()" class="bg-blue-600 px-8 py-3 rounded-lg font-bold">إرسال</button>
         </div>
     </main>
 
@@ -42,33 +43,30 @@
 
         async function sendMessage() {
             const input = document.getElementById('user-input');
-            const prompt = input.value.trim();
-            if (!prompt) return;
+            const text = input.value.trim();
+            if (!text) return;
 
-            appendMessage('user', prompt);
+            // إظهار رسالة المستخدم
+            const chatBox = document.getElementById('chat-box');
+            chatBox.innerHTML += `<div class="bg-blue-700 p-4 rounded-xl max-w-md mr-auto">${text}</div>`;
             input.value = '';
-            const loadingId = appendMessage('bot', 'جاري معالجة طلبك بأفضل تكلفة...');
+
+            // رسالة انتظار
+            const botMsgId = 'bot-' + Date.now();
+            chatBox.innerHTML += `<div id="${botMsgId}" class="bg-slate-700 p-4 rounded-xl max-w-md">جاري المعالجة...</div>`;
+            chatBox.scrollTop = chatBox.scrollHeight;
 
             try {
                 const response = await fetch('/api/generate', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ prompt: prompt, mode: currentMode })
+                    body: JSON.stringify({ prompt: text, mode: currentMode })
                 });
                 const data = await response.json();
-                document.getElementById(loadingId).innerText = data.result;
+                document.getElementById(botMsgId).innerText = data.result;
             } catch (e) {
-                document.getElementById(loadingId).innerText = "حدث خطأ. تأكد من اتصال السيرفر.";
+                document.getElementById(botMsgId).innerText = "حدث خطأ في الاتصال.";
             }
-        }
-
-        function appendMessage(role, text) {
-            const chatBox = document.getElementById('chat-box');
-            const id = 'msg-' + Date.now();
-            const align = role === 'user' ? 'mr-auto bg-blue-700' : 'ml-auto bg-slate-800';
-            chatBox.innerHTML += `<div id="${id}" class="${align} p-3 rounded-xl max-w-[80%] text-sm">${text}</div>`;
-            chatBox.scrollTop = chatBox.scrollHeight;
-            return id;
         }
     </script>
 </body>
