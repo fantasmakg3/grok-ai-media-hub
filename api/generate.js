@@ -4,13 +4,15 @@ export default async function handler(req, res) {
     const { prompt, mode } = req.body;
     const apiKey = process.env.GROK_API_KEY;
 
-    // اختيار الموديل الأوفر بناءً على قائمة أسعار xAI
-    let selectedModel = "grok-3-mini"; // للدردشة ($0.30 لكل مليون توكن)
+    // اختيار الموديل الأنسب والأرخص من قائمة أسعار xAI
+    let selectedModel = "grok-3-mini"; 
     
     if (mode === 'image') {
-        selectedModel = "grok-imagine-image"; // للصور ($0.02 للصورة)
+        selectedModel = "grok-imagine-image"; 
     } else if (mode === 'video') {
-        selectedModel = "grok-imagine-video"; // للفيديو ($0.05 للثانية)
+        selectedModel = "grok-imagine-video"; 
+    } else if (mode === 'edit') {
+        selectedModel = "grok-3"; 
     }
 
     try {
@@ -30,12 +32,12 @@ export default async function handler(req, res) {
         const data = await response.json();
         
         if (!response.ok) {
-            return res.status(response.status).json({ result: `خطأ من Grok: ${data.error?.message || 'تأكد من الرصيد والمفتاح'}` });
+            return res.status(response.status).json({ result: `تنبيه: ${data.error?.message || 'تأكد من إعدادات الحساب'}` });
         }
 
         res.status(200).json({ result: data.choices[0].message.content });
 
     } catch (error) {
-        res.status(500).json({ result: "فشل الاتصال: تأكد من مفتاح API في Vercel" });
+        res.status(500).json({ result: "فشل السيرفر في الوصول لـ xAI" });
     }
 }
