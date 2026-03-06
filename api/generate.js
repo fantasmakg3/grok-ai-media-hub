@@ -43,3 +43,11 @@ export default async function handler(req, res) {
         res.status(500).json({ result: "فشل الاتصال بخوادم Grok" });
     }
 }
+
+// كود تفعيل زر Enter للإرسال
+document.getElementById("user-input").addEventListener("keypress", function(event) {
+    if (event.key === "Enter") {
+        event.preventDefault(); // منع السطر الجديد
+        sendMessage(); // تشغيل دالة الإرسال
+    }
+});
