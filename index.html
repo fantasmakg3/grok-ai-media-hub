@@ -3,140 +3,113 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Grok Studio Pro - خالد</title>
+    <title>Grok Studio - Floating Mode</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Tajawal', sans-serif; background: #020617; color: white; margin: 0; overflow: hidden; }
-        .glass { background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(10px); border-top: 1px solid rgba(255,255,255,0.1); }
+        body { font-family: 'Tajawal', sans-serif; background: #020617; color: white; overflow: hidden; }
         
-        /* انسيابية حركة القائمة */
-        .nav-hidden { transform: translateY(100%); opacity: 0; pointer-events: none; }
-        .nav-visible { transform: translateY(0); opacity: 1; transition: all 0.3s ease-in-out; }
+        /* انيميشن القائمة العائمة */
+        .fab-menu {
+            transform: scale(0);
+            transform-origin: bottom right;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .fab-menu.active { transform: scale(1); }
         
-        /* تعديل موضع الإدخال عند التركيز */
-        .input-container { transition: all 0.3s ease; bottom: 75px; }
-        .input-focused { bottom: 15px !important; }
-
-        #chat-messages { height: calc(100vh - 170px); scroll-behavior: smooth; }
-        @media (min-width: 768px) { #chat-messages { height: calc(100vh - 130px); } .input-container { bottom: 20px !important; } }
+        #chat-messages { height: calc(100vh - 100px); scroll-behavior: smooth; }
+        .glass-blur { background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(15px); border: 1px solid rgba(255,255,255,0.1); }
     </style>
 </head>
-<body class="flex flex-col md:flex-row h-screen w-full">
+<body class="h-screen w-full flex flex-col">
 
-    <aside class="hidden md:flex w-64 bg-slate-900 border-l border-slate-800 p-6 flex-col shadow-2xl">
-        <h1 class="text-xl font-bold text-blue-500 mb-8 italic tracking-wider">GROK STUDIO</h1>
-        <nav class="space-y-3 flex-1">
-            <button onclick="switchView('chat')" class="w-full text-right p-4 rounded-2xl bg-blue-600/10 border border-blue-500/20 flex items-center gap-3"><span>💬</span> الدردشة</button>
-            <button onclick="switchView('image')" class="w-full text-right p-4 rounded-2xl hover:bg-slate-800 transition-all flex items-center gap-3 text-slate-400"><span>🖼️</span> توليد الصور</button>
-            <button onclick="switchView('edit')" class="w-full text-right p-4 rounded-2xl hover:bg-slate-800 transition-all flex items-center gap-3 text-slate-400"><span>🎨</span> التعديل</button>
-        </nav>
-        <div class="p-4 bg-slate-800/50 rounded-2xl text-xs border border-slate-700">
-            <p class="text-slate-500 mb-1">الرصيد المتوفر</p>
-            <p class="text-blue-400 font-bold text-lg">$4.37</p>
+    <header class="p-4 border-b border-slate-800 bg-slate-900/50 flex justify-between items-center shrink-0">
+        <h1 class="text-blue-500 font-bold italic tracking-tighter text-lg">GROK STUDIO</h1>
+        <div class="bg-blue-600/20 text-blue-400 px-3 py-1 rounded-full text-[10px] font-bold">$4.37</div>
+    </header>
+
+    <main id="chat-messages" class="flex-1 overflow-y-auto p-4 space-y-4 pb-28">
+        <div class="bg-slate-800/80 p-4 rounded-2xl rounded-tr-none max-w-[85%] text-sm border border-slate-700">
+            أهلاً خالد! اضغط على زر (+) لاختيار المود (صور، فيديو، دردشة).
         </div>
-    </aside>
-
-    <main class="flex-1 flex flex-col relative bg-slate-950">
-        
-        <header class="md:hidden flex justify-between items-center p-4 border-b border-slate-800 bg-slate-900/80 backdrop-blur-md z-30">
-            <span class="text-blue-500 font-bold italic">GROK STUDIO</span>
-            <span class="bg-blue-600/20 text-blue-400 px-3 py-1 rounded-full text-[10px] font-bold border border-blue-500/30">$4.37</span>
-        </header>
-
-        <div id="chat-messages" class="flex-1 overflow-y-auto p-4 space-y-5">
-            <div class="flex justify-start">
-                <div class="bg-slate-800/80 p-4 rounded-2xl rounded-tr-none max-w-[85%] text-sm border border-slate-700 shadow-sm">
-                    أهلاً خالد! تم تحديث الواجهة. الأيقونات ستختفي الآن عند الكتابة لتعطيك مساحة أكبر. ماذا سنصنع اليوم؟
-                </div>
-            </div>
-        </div>
-
-        <div id="input-section" class="input-container fixed left-0 right-0 p-3 z-40">
-            <div class="max-w-4xl mx-auto flex items-center gap-2 bg-slate-900/95 rounded-2xl px-4 py-1 border border-slate-700 shadow-2xl backdrop-blur-md">
-                <input type="text" id="user-input" placeholder="اكتب سؤالك هنا..." 
-                       class="flex-1 bg-transparent border-none outline-none py-3 text-sm text-white placeholder-slate-500">
-                <button onclick="sendMessage()" class="bg-blue-600 w-10 h-10 rounded-xl flex items-center justify-center text-lg hover:scale-105 active:scale-95 transition-all shadow-lg shadow-blue-500/20">🚀</button>
-            </div>
-        </div>
-
-        <nav id="bottom-nav" class="md:hidden fixed bottom-0 w-full glass flex justify-around items-center h-16 z-50 nav-visible">
-            <button onclick="switchView('chat')" class="flex flex-col items-center gap-1 text-blue-500">
-                <span class="text-xl">💬</span>
-                <span class="text-[10px] font-bold">الدردشة</span>
-            </button>
-            <button onclick="switchView('image')" class="flex flex-col items-center gap-1 text-slate-500">
-                <span class="text-xl">🖼️</span>
-                <span class="text-[10px]">الصور</span>
-            </button>
-            <button onclick="switchView('edit')" class="flex flex-col items-center gap-1 text-slate-500">
-                <span class="text-xl">🎨</span>
-                <span class="text-[10px]">التعديل</span>
-            </button>
-            <button onclick="switchView('video')" class="flex flex-col items-center gap-1 text-slate-500">
-                <span class="text-xl">🎬</span>
-                <span class="text-[10px]">فيديو</span>
-            </button>
-        </nav>
     </main>
 
+    <div class="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-3">
+        <div id="fab-options" class="fab-menu flex flex-col gap-3 mb-2">
+            <button onclick="selectMode('video')" class="flex items-center gap-2 bg-slate-800 p-3 rounded-xl border border-slate-700 shadow-xl">
+                <span class="text-xs">🎬 فيديو</span>
+            </button>
+            <button onclick="selectMode('edit')" class="flex items-center gap-2 bg-slate-800 p-3 rounded-xl border border-slate-700 shadow-xl">
+                <span class="text-xs">🎨 تعديل</span>
+            </button>
+            <button onclick="selectMode('image')" class="flex items-center gap-2 bg-slate-800 p-3 rounded-xl border border-slate-700 shadow-xl">
+                <span class="text-xs">🖼️ صور</span>
+            </button>
+            <button onclick="selectMode('chat')" class="flex items-center gap-2 bg-blue-600 p-3 rounded-xl shadow-xl">
+                <span class="text-xs">💬 دردشة</span>
+            </button>
+        </div>
+        
+        <button id="main-fab" onclick="toggleFab()" class="bg-blue-600 w-14 h-14 rounded-2xl shadow-2xl flex items-center justify-center text-2xl transition-transform active:scale-90">
+            <span id="fab-icon">+</span>
+        </button>
+    </div>
+
+    <div class="fixed bottom-6 left-6 right-24 z-40">
+        <div class="glass-blur rounded-2xl p-1 flex items-center border border-slate-700 shadow-2xl">
+            <input type="text" id="user-input" placeholder="اكتب هنا..." 
+                   class="flex-1 bg-transparent border-none outline-none p-3 text-sm text-white">
+            <button onclick="sendMessage()" class="bg-blue-600 px-4 py-3 rounded-xl text-sm font-bold">إرسال</button>
+        </div>
+    </div>
+
     <script>
-        const userInput = document.getElementById('user-input');
-        const bottomNav = document.getElementById('bottom-nav');
-        const inputSection = document.getElementById('input-section');
-        const chatMessages = document.getElementById('chat-messages');
+        let currentMode = 'chat';
 
-        // إدارة ظهور واختفاء الأيقونات عند الكتابة
-        userInput.addEventListener('focus', () => {
-            if (window.innerWidth < 768) {
-                bottomNav.classList.add('nav-hidden');
-                inputSection.classList.add('input-focused');
-            }
-        });
-
-        userInput.addEventListener('blur', () => {
-            setTimeout(() => {
-                bottomNav.classList.remove('nav-hidden');
-                inputSection.classList.remove('input-focused');
-            }, 150);
-        });
-
-        // تفعيل الإرسال بـ Enter
-        userInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') sendMessage();
-        });
-
-        async function sendMessage() {
-            const text = userInput.value.trim();
-            if (!text) return;
-
-            // إظهار رسالة المستخدم
-            chatMessages.innerHTML += `<div class="flex justify-end"><div class="bg-blue-600 p-3 rounded-2xl rounded-tl-none max-w-[85%] text-sm shadow-md">${text}</div></div>`;
-            userInput.value = '';
-            chatMessages.scrollTop = chatMessages.scrollHeight;
-
-            // رسالة انتظار
-            const botId = 'bot-' + Date.now();
-            chatMessages.innerHTML += `<div class="flex justify-start"><div id="${botId}" class="bg-slate-800 p-3 rounded-2xl rounded-tr-none max-w-[85%] text-sm border border-slate-700 animate-pulse text-slate-400 italic">جاري التفكير...</div></div>`;
-            chatMessages.scrollTop = chatMessages.scrollHeight;
-
-            try {
-                const response = await fetch('/api/generate', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ prompt: text, mode: 'chat' })
-                });
-                const data = await response.json();
-                document.getElementById(botId).innerText = data.result;
-                document.getElementById(botId).classList.remove('animate-pulse', 'text-slate-400', 'italic');
-            } catch (e) {
-                document.getElementById(botId).innerText = "عذراً، حدث خطأ في الاتصال بالسيرفر.";
-            }
+        function toggleFab() {
+            const menu = document.getElementById('fab-options');
+            const icon = document.getElementById('fab-icon');
+            menu.classList.toggle('active');
+            icon.innerText = menu.classList.contains('active') ? '×' : '+';
         }
 
-        function switchView(mode) {
-            // التبديل البرمجي سيتم تفعيله عند برمجة مود الصور والفيديو
-            console.log("الوضع الحالي: " + mode);
+        function selectMode(mode) {
+            currentMode = mode;
+            toggleFab();
+            // تغيير لون الزر ليعرف المستخدم المود المختار
+            const btn = document.getElementById('main-fab');
+            if(mode === 'chat') btn.className = "bg-blue-600 w-14 h-14 rounded-2xl shadow-2xl flex items-center justify-center text-2xl";
+            else btn.className = "bg-indigo-600 w-14 h-14 rounded-2xl shadow-2xl flex items-center justify-center text-2xl";
+            
+            alert("تم الانتقال لوضع: " + mode);
+        }
+
+        async function sendMessage() {
+            const input = document.getElementById('user-input');
+            const text = input.value.trim();
+            if(!text) return;
+
+            const box = document.getElementById('chat-messages');
+            box.innerHTML += `<div class="flex justify-end"><div class="bg-blue-600 p-3 rounded-2xl rounded-tl-none max-w-[85%] text-sm shadow-md">${text}</div></div>`;
+            input.value = '';
+            box.scrollTop = box.scrollHeight;
+
+            const botId = 'bot-' + Date.now();
+            box.innerHTML += `<div class="flex justify-start"><div id="${botId}" class="bg-slate-800 p-3 rounded-2xl rounded-tr-none max-w-[85%] text-sm border border-slate-700 animate-pulse">جاري تنفيذ طلبك (${currentMode})...</div></div>`;
+            box.scrollTop = box.scrollHeight;
+
+            try {
+                const res = await fetch('/api/generate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ prompt: text, mode: currentMode })
+                });
+                const data = await res.json();
+                document.getElementById(botId).innerText = data.result;
+                document.getElementById(botId).classList.remove('animate-pulse');
+            } catch (e) {
+                document.getElementById(botId).innerText = "خطأ في الاتصال بالسيرفر";
+            }
         }
     </script>
 </body>
