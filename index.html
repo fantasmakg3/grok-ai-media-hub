@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grok AI Hub</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-900 text-white font-sans h-screen flex overflow-hidden">
+
+    <aside class="w-64 border-l border-slate-700 p-6 flex flex-col gap-4 bg-slate-800">
+        <h1 class="text-2xl font-bold text-blue-400 mb-6">Grok Vision</h1>
+        <button class="bg-blue-600 p-3 rounded-lg text-right hover:bg-blue-500 transition">🖼️ توليد صورة</button>
+        <button class="bg-slate-700 p-3 rounded-lg text-right hover:bg-slate-600 transition">🎨 تعديل صورة</button>
+        <button class="bg-slate-700 p-3 rounded-lg text-right hover:bg-slate-600 transition">🎬 تحويل لفيديو</button>
+    </aside>
+
+    <main class="flex-1 flex flex-col">
+        <div id="chat-box" class="flex-1 p-6 overflow-y-auto space-y-4">
+            <div class="bg-slate-800 p-4 rounded-2xl max-w-lg shadow-lg">
+                أهلاً بك! أنا مساعدك الذكي المرتبط بـ Grok. ماذا تريد أن نصنع اليوم؟
+            </div>
+        </div>
+
+        <div class="p-6 bg-slate-900 border-t border-slate-800">
+            <div class="flex gap-4 items-center">
+                <input type="text" placeholder="اكتب وصف الصورة هنا..." 
+                       class="flex-1 p-4 rounded-xl bg-slate-800 border border-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <button class="bg-blue-600 px-6 py-4 rounded-xl font-bold">إرسال</button>
+            </div>
+        </div>
+    </main>
+
+</body>
+</html>
